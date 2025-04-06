@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đồng Hồ Bấm Giờ Siêu Đẹp</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            text-align: center;
+            perspective: 1000px;
+        }
+
+        .title {
+            color: white;
+            font-size: 3rem;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .stopwatch {
+            font-size: 6rem;
+            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px 60px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+            margin-bottom: 40px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotateX(0deg); }
+            50% { transform: translateY(-20px) rotateX(5deg); }
+            100% { transform: translateY(0px) rotateX(0deg); }
+        }
+
+        .milliseconds {
+            font-size: 2rem;
+            display: inline-block;
+            width: 120px;
+            text-align: left;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-start {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+        }
+
+        .btn-stop {
+            background: linear-gradient(45deg, #F44336, #FF9800);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(45deg, #2196F3, #00BCD4);
+            color: white;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .stopwatch {
+                font-size: 3rem;
+                padding: 20px 30px;
+            }
+            
+            .milliseconds {
+                font-size: 1.5rem;
+                width: 80px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Đồng Hồ Bấm Giờ</h1>
+        <div class="stopwatch">
+            <span id="minutes">00</span>:<span id="seconds">00</span>.<span id="milliseconds" class="milliseconds">00</span>
+        </div>
+        <div class="buttons">
+            <button class="btn btn-start" id="startBtn">Bắt đầu</button>
+            <button class="btn btn-stop" id="stopBtn">Dừng</button>
+            <button class="btn btn-reset" id="resetBtn">Đặt lại</button>
+        </div>
+    </div>
+
+    <div class="particles" id="particles"></div>
+
+    <script>
+        let minutes = 0;
+        let seconds = 0;
+        let milliseconds = 0;
+        let timer;
+        let isRunning = false;
+
+        const minutesElement = document.getElementById('minutes');
+        const secondsElement = document.getElementById('seconds');
+        const millisecondsElement = document.getElementById('milliseconds');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const particlesContainer = document.getElementById('particles');
+
+        function updateDisplay() {
+            minutesElement.textContent = String(minutes).padStart(2, '0');
+            secondsElement.textContent = String(seconds).padStart(2, '0');
+            millisecondsElement.textContent = String(milliseconds).padStart(2, '0');
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                timer = setInterval(() => {
+                    milliseconds++;
+                    
+                    if (milliseconds === 100) {
+                        milliseconds = 0;
+                        seconds++;
+                    }
+                    
+                    if (seconds === 60) {
+                        seconds = 0;
+                        minutes++;
+                    }
+                    
+                    updateDisplay();
+                    createParticle();
+                }, 10);
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+            isRunning = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            minutes = 0;
+            seconds = 0;
+            milliseconds = 0;
+            updateDisplay();
+        }
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random size between 2px and 6px
+            const size = Math.random() * 4 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Random position
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.bottom = `0px`;
+            
+            // Random animation duration between 3s and 8s
+            const duration = Math.random() * 5 + 3;
+            particle.style.animationDuration = `${duration}s`;
+            
+            particlesContainer.appendChild(particle);
+            
+            // Remove particle after animation completes
+            setTimeout(() => {
+                particle.remove();
+            }, duration * 1000);
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        stopBtn.addEventListener('click', stopTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        // Create initial particles
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                createParticle();
+            }, Math.random() * 3000);
+        }
+    </script>
+</body>
+</html>
